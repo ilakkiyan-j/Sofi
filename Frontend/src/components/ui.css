@@ -1,0 +1,308 @@
+/* ------------------------------------------------------ */
+/* MAIN LAYOUT */
+/* ------------------------------------------------------ */
+
+.chat-window {
+    width: 100%;
+    height: 100vh;
+    background: #f5f7fa;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    gap: 40px;
+}
+
+/* LEFT SIDE → Orb + Waveform */
+.visual-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    flex: 0 0 35%;
+    padding-right: 5%;
+}
+
+/* RIGHT SIDE → Chat + Input */
+.interactions {
+    flex: 0 0 45%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+
+/* ------------------------------------------------------ */
+/* LIQUID AI ORB */
+/* ------------------------------------------------------ */
+
+.sofi-orb {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+/* Liquid Core Blob */
+.orb-liquid {
+    width: 140%;
+    height: 140%;
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(circle at 20% 20%,
+    #7ed7ff, #4b9fff, #7a5cf4, #b84bff);
+    background-size: 300% 300%;
+    animation: liquidMove 6s ease-in-out infinite,
+    liquidMorph 8s ease-in-out infinite;
+    filter: blur(25px);
+    border-radius: 40%;
+}
+
+/* Orb Glow */
+.orb-glow {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    border-radius: 50%;
+    box-shadow: 0 0 35px rgba(90, 180, 255, 0.6),
+    0 0 70px rgba(120, 100, 255, 0.4);
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* Listening = stronger intensity */
+.sofi-orb.listening .orb-liquid {
+    animation-duration: 4s, 6s;
+}
+
+.sofi-orb.listening .orb-glow {
+    box-shadow: 0 0 50px rgba(110, 200, 255, 0.8),
+    0 0 90px rgba(140, 100, 255, 0.7);
+}
+
+
+/* ORB ANIMATIONS */
+
+@keyframes liquidMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes liquidMorph {
+    0%   { border-radius: 42% 58% 70% 30% / 45% 30% 70% 55%; }
+    33%  { border-radius: 55% 45% 63% 37% / 60% 40% 60% 40%; }
+    66%  { border-radius: 68% 32% 45% 55% / 40% 65% 35% 60%; }
+    100% { border-radius: 42% 58% 70% 30% / 45% 30% 70% 55%; }
+}
+
+@keyframes glowPulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.06); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
+}
+
+
+/* ------------------------------------------------------ */
+/* LIQUID WAVEFORM */
+/* ------------------------------------------------------ */
+
+.waveform-container {
+    display: flex;
+    gap: 6px;
+    height: 45px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.waveform-container.active {
+    opacity: 1;
+}
+
+.waveform-container .wave-bar {
+    width: 8px;
+    height: 14px;
+    background: linear-gradient(180deg,
+    #7ed7ff, #4b9fff, #7a5cf4, #b84bff);
+    background-size: 200% 200%;
+    border-radius: 20px;
+    animation: waveBounce 1.1s ease-in-out infinite,
+    waveColorShift 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px rgba(140, 100, 255, 0.6));
+}
+
+.waveform-container .wave-bar:nth-child(1) { animation-delay: 0s; }
+.waveform-container .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.waveform-container .wave-bar:nth-child(3) { animation-delay: 0.30s; }
+.waveform-container .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.waveform-container .wave-bar:nth-child(5) { animation-delay: 0.60s; }
+
+@keyframes waveBounce {
+    0%   { height: 14px; }
+    35%  { height: 36px; }
+    70%  { height: 18px; }
+    100% { height: 14px; }
+}
+
+@keyframes waveColorShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+/* ------------------------------------------------------ */
+/* CHAT BOX */
+/* ------------------------------------------------------ */
+
+.chatbox {
+    width: 100%;
+    height: 350px;
+    padding: 20px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.msg {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 14px;
+    font-size: 15px;
+    margin-top: 10px;
+    max-width: 85%;
+}
+
+.msg.user {
+    margin-left: auto;
+    background: #4fa3ff;
+    color: white;
+}
+
+.msg.sofi {
+    margin-right: auto;
+    background: #e8edf5;
+    color: #222;
+}
+
+/* Typing dots */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: #4fa3ff;
+    border-radius: 50%;
+    animation: typing 1s infinite ease;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typing {
+    0% { opacity: 0.2; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-6px); }
+    100% { opacity: 0.2; transform: translateY(0); }
+}
+
+
+/* ------------------------------------------------------ */
+/* INPUT BAR */
+/* ------------------------------------------------------ */
+
+.input-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.input-bar input {
+    flex: 1;
+    height: 45px;
+    padding: 0 15px;
+    border-radius: 12px;
+    border: 1px solid #d8dfe6;
+    outline: none;
+    font-size: 15px;
+}
+
+/* Send Button */
+.send-btn {
+    width: 55px;
+    height: 45px;
+    border: none;
+    border-radius: 12px;
+    background: #4da3ff;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.send-btn:hover {
+    background: #2583ff;
+}
+
+
+/* ------------------------------------------------------ */
+/* LIQUID ORB THEMED MIC BUTTON */
+/* ------------------------------------------------------ */
+
+.mic-button {
+    width: 50px;
+    height: 50px;
+    background: #ffffff55;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: 0.3s ease;
+    font-size: 22px;
+}
+
+/* ACTIVE MIC (Matches Liquid Orb) */
+.mic-button.active {
+    background: linear-gradient(135deg,
+    #7ed7ff, #4b9fff, #7a5cf4, #b84bff);
+    background-size: 300%;
+    color: #fff !important;
+    animation: micLiquidShift 3s infinite ease-in-out,
+    micPulseGlow 1.3s infinite ease-in-out;
+    box-shadow:
+            0 0 18px rgba(100, 170, 255, 0.8),
+            0 0 40px rgba(160, 80, 255, 0.7);
+}
+
+@keyframes micLiquidShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes micPulseGlow {
+    0% { transform: scale(1); }
+    50% {
+        transform: scale(1);
+        box-shadow:
+                0 0 30px rgba(120, 150, 255, 0.9),
+                0 0 50px rgba(160, 80, 255, 0.8);
+    }
+    100% { transform: scale(1); }
+}

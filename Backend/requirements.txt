@@ -1,0 +1,28 @@
+torch
+# Core framework
+fastapi
+uvicorn
+
+# Speech recognition (offline)
+vosk
+sounddevice
+pyaudio
+
+# Wake-word detection
+pvporcupine
+
+# Text-to-Speech (Coqui)
+TTS
+numpy
+
+# Local memory (semantic)
+chromadb
+sentence-transformers
+
+# Network and system utilities
+requests
+python-dotenv
+
+# Optional: CLI/Debug Tools
+rich
+colorama

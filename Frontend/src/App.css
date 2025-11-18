@@ -1,0 +1,38 @@
+.sofi-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+
+    gap: 80px; /* spacing between orb and chat panel */
+}
+
+/* LEFT SIDE - ORB AREA */
+.orb-area {
+    width: 350px;
+    height: 350px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex-shrink: 0; /* prevents orb from overlapping chat */
+    overflow: visible;
+}
+
+/* RIGHT SIDE - CHAT PANEL */
+.chat-area {
+    width: 480px;
+    height: auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    gap: 18px;
+    flex-shrink: 0; /* prevents chat from collapsing */
+}
