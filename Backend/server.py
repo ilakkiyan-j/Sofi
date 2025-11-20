@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from stt_vosk_server import start_listening_stream, stop_and_transcribe
-from llm_core import process_query
+from llm.core import process_query
 from tts_coqui import speak
-from memory import remember
+from memory.context import remember
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

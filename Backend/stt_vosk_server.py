@@ -2,7 +2,7 @@ import sounddevice as sd
 import queue, json, time
 from vosk import Model, KaldiRecognizer
 from config import VOSK_MODEL_PATH
-from logger import log
+from tools.logger import log
 
 model = Model(str(VOSK_MODEL_PATH))
 samplerate = 16000
@@ -84,3 +84,4 @@ def stop_and_transcribe():
     log(f"📝 Recognized: {result}")
 
     return result
+

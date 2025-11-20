@@ -1,8 +1,8 @@
 import os, simpleaudio as sa
 from pathlib import Path
 from TTS.api import TTS
+from config import COQUI_TTS_MODEL
 
-MODEL = "tts_models/en/vctk/vits"
 SPEAKER = "p294" #p294
 SPEED = 0.8
 ENERGY = 1.05
@@ -11,7 +11,7 @@ PITCH = 1.0
 os.environ["PHONEMIZER_ESPEAK_PATH"] = r"C:\Program Files\eSpeak NG\espeak-ng.exe"
 os.environ["PHONEMIZER_ESPEAK_LIBRARY"] = r"C:\Program Files\eSpeak NG\libespeak-ng.dll"
 
-tts = TTS(MODEL, progress_bar=False, gpu=False)
+tts = TTS(COQUI_TTS_MODEL, progress_bar=False, gpu=False)
 
 def speak(text: str):
     text = text.strip()
@@ -36,3 +36,4 @@ def speak(text: str):
     wave_obj = sa.WaveObject.from_wave_file(str(out_path))
     play_obj = wave_obj.play()
     play_obj.wait_done()
+
