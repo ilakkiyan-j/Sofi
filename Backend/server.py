@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from stt_vosk_server import start_listening_stream, stop_and_transcribe
 from llm.core import process_query
-from tts_coqui import speak
-from memory.context import remember
+from tts_coqui import speak, stop_speak
+from memory.context import remember, clear_memory
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -39,8 +39,9 @@ async def stop_listening():
 
 
 @app.post("/send_text")
-async def handle_text(payload: dict):
+async def handle_text(payload: dict, background_tasks: BackgroundTasks):
     text = payload.get("text", "")
+    mute = payload.get("mute", False)
 
     if not text:
         return {"response": ""}
@@ -52,6 +53,22 @@ async def handle_text(payload: dict):
     remember(text, reply)
 
     # TTS
-    speak(reply)
+    if not mute:
+        background_tasks.add_task(speak, reply)
 
     return {"response": reply}
+
+
+@app.post("/stop_speech")
+async def stop_speech():
+    stop_speak()
+    return {"status": "speech_stopped"}
+
+
+@app.post("/clear_chat")
+async def clear_chat():
+    """Reset the session: stop any speech and clear long-term memory."""
+    stop_speak()
+    clear_memory()
+    return {"status": "chat_cleared"}
+

@@ -2,3 +2,4 @@ Ollama:
     - Make sure your local LLM service is working: ollama serve
     - Then in another terminal: ollama run llama3 "Hello from Sofi!"
 
+uvicorn server:app --reload

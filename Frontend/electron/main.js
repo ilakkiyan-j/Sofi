@@ -10,12 +10,16 @@ function createWindow() {
     const win = new BrowserWindow({
         title: "Sofi AI",
         icon: path.join(__dirname, "assets/sofi.png"),
-        width: 1200,
+        width: 900,
         height: 600,
-        frame: true,            // No title bar
-        transparent: false,       // Glass background
-        resizable: false,
-        alwaysOnTop: true,       // Floating orb
+        minWidth: 700,
+        minHeight: 500,
+        frame: true,            
+        transparent: false,       
+        resizable: true,         // User can drag-resize
+        maximizable: true,       // Enable OS maximizing
+        fullscreenable: true,    // Enable OS fullscreen
+        alwaysOnTop: false,      // Disabled so OS maximize button is active
         hasShadow: false,
         roundedCorners: true,
         webPreferences: {
@@ -27,3 +31,4 @@ function createWindow() {
 }
 
 app.whenReady().then(createWindow);
+

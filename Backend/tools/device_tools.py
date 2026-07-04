@@ -7,6 +7,13 @@ from PIL import ImageGrab
 import win32clipboard
 import psutil
 
+# For Pycaw Volume Control
+from ctypes import cast, POINTER
+try:
+    from comtypes import CLSCTX_ALL
+    from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+except ImportError:
+    pass  # Will be handled gracefully or installed by user
 
 # ---------------------------------------------------------
 #  HELPERS
@@ -31,30 +38,34 @@ def run_powershell(cmd: str):
 #  VOLUME CONTROL
 # ---------------------------------------------------------
 
+def _get_audio_interface():
+    try:
+        import comtypes
+        comtypes.CoInitialize()
+    except Exception:
+        pass
+        
+    devices = AudioUtilities.GetSpeakers()
+    return devices.EndpointVolume
+
 def set_volume(level: int) -> str:
     level = max(0, min(level, 100))
 
     try:
-        # 174 = Volume Down, 175 = Volume Up
-        # We approximate volume with repeated key presses (simple but reliable)
-        subprocess.run(
-            f"powershell (new-object -COM WScript.Shell).SendKeys([char]174)",
-            shell=True
-        )
+        volume = _get_audio_interface()
+        volume.SetMasterVolumeLevelScalar(level / 100.0, None)
         return f"Volume set to {level}%."
-    except:
-        return "Couldn't adjust volume."
+    except Exception as e:
+        return f"Couldn't adjust volume: {e}"
 
 
 def mute_volume() -> str:
     try:
-        subprocess.run(
-            "powershell (new-object -COM WScript.Shell).SendKeys([char]173)",
-            shell=True
-        )
+        volume = _get_audio_interface()
+        volume.SetMute(1, None)
         return "Muted the volume."
-    except:
-        return "Couldn't mute the volume."
+    except Exception as e:
+        return f"Couldn't mute the volume: {e}"
 
 
 # ---------------------------------------------------------
@@ -73,30 +84,21 @@ def set_brightness(level: int) -> str:
 #  WIFI CONTROL (Dynamic Adapter Detection)
 # ---------------------------------------------------------
 
-def get_wifi_adapter_name():
-    success, output = run_powershell(
-        "Get-NetAdapter -Physical | Where-Object {$_.Name -like 'Wi*' -or $_.InterfaceDescription -like '*Wireless*'} | "
-        "Select -First 1 -ExpandProperty Name"
-    )
-
-    return output if success and output else None
-
-
 def wifi_off() -> str:
-    name = get_wifi_adapter_name()
-    if not name:
-        return "Couldn't detect your WiFi adapter."
-
-    success, _ = run_powershell(f"netsh interface set interface name='{name}' admin=disabled")
+    success, _ = run_powershell(
+        "[Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult() | "
+        "Where-Object {$_.Kind -eq 'WiFi'} | "
+        "ForEach-Object {$_.SetStateAsync(0).GetAwaiter().GetResult()}"
+    )
     return "WiFi is now turned OFF!" if success else "Couldn't turn off WiFi."
 
 
 def wifi_on() -> str:
-    name = get_wifi_adapter_name()
-    if not name:
-        return "Couldn't detect your WiFi adapter."
-
-    success, _ = run_powershell(f"netsh interface set interface name='{name}' admin=enabled")
+    success, _ = run_powershell(
+        "[Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult() | "
+        "Where-Object {$_.Kind -eq 'WiFi'} | "
+        "ForEach-Object {$_.SetStateAsync(1).GetAwaiter().GetResult()}"
+    )
     return "WiFi is now turned ON!" if success else "Couldn't turn on WiFi."
 
 
@@ -191,3 +193,68 @@ def get_system_info() -> dict:
         "ram_percent": psutil.virtual_memory().percent,
         "battery_percent": psutil.sensors_battery().percent if psutil.sensors_battery() else "No battery detected"
     }
+
+
+# ---------------------------------------------------------
+#  ADDITIONAL PC INTEGRATIONS
+# ---------------------------------------------------------
+
+def close_app(app_name: str) -> str:
+    """Fuzzy find and terminate running processes with the given name."""
+    app_name_lower = app_name.lower().strip()
+    terminated_count = 0
+    terminated_names = set()
+    
+    for proc in psutil.process_iter(['pid', 'name']):
+        try:
+            pinfo = proc.info
+            pname = pinfo['name']
+            if pname:
+                pname_lower = pname.lower()
+                # If app_name is a substring of process name (e.g. "chrome" in "chrome.exe")
+                # or vice-versa
+                if app_name_lower in pname_lower or pname_lower.startswith(app_name_lower):
+                    proc.terminate()
+                    terminated_count += 1
+                    terminated_names.add(pname)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            continue
+            
+    if terminated_count > 0:
+        return f"Terminated {terminated_count} process(es): {', '.join(terminated_names)}."
+    else:
+        return f"No running processes found matching '{app_name}'."
+
+
+def empty_recycle_bin() -> str:
+    """Empty the Windows Recycle Bin."""
+    try:
+        # 7 = SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND
+        result = ctypes.windll.shell32.SHEmptyRecycleBinW(None, None, 7)
+        # 0x80004005 is E_FAIL, which can happen if the bin is already empty
+        if result == 0 or result == -2147467259:  # 0x80004005 is -2147467259 in signed 32-bit
+            return "Recycle bin emptied successfully."
+        else:
+            return f"Recycle bin empty process returned status {result}."
+    except Exception as e:
+        return f"Could not empty recycle bin: {e}"
+
+
+def get_disk_space() -> str:
+    """Return total and free disk space for local drives."""
+    drives_info = []
+    for partition in psutil.disk_partitions():
+        if 'fixed' in partition.opts or partition.fstype:
+            try:
+                usage = psutil.disk_usage(partition.mountpoint)
+                free_gb = usage.free / (1024**3)
+                total_gb = usage.total / (1024**3)
+                drives_info.append(
+                    f"Drive {partition.mountpoint} ({partition.fstype}): {free_gb:.1f} GB free of {total_gb:.1f} GB ({usage.percent}% used)"
+                )
+            except PermissionError:
+                continue
+    if drives_info:
+        return "\n".join(drives_info)
+    return "Could not retrieve disk space info."
+

@@ -11,6 +11,8 @@ USER = os.getenv("USERNAME")
 START_MENU_PATHS = [
     fr"C:\Users\{USER}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs",
     r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs",
+    fr"C:\Users\{USER}\Desktop",
+    r"C:\Users\Public\Desktop",
 ]
 
 app_index = {}           # For .lnk apps → { "chrome": "C:/.../chrome.lnk" }

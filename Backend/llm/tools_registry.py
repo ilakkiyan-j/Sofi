@@ -26,7 +26,10 @@ from tools.device_tools import (
     lock_system,
     shutdown,
     restart,
-    get_system_info
+    get_system_info,
+    close_app,
+    empty_recycle_bin,
+    get_disk_space
 )
 
 TOOLS = {
@@ -54,7 +57,10 @@ TOOLS = {
     "lock_system": lock_system,
     "shutdown": shutdown,
     "restart": restart,
-    "get_system_info": get_system_info
+    "get_system_info": get_system_info,
+    "close_app": close_app,
+    "empty_recycle_bin": empty_recycle_bin,
+    "get_disk_space": get_disk_space
 }
 
 
@@ -141,7 +147,7 @@ TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "search_web",
-            "description": "Search the web using DuckDuckGo HTML scraping.",
+            "description": "Search the web using DuckDuckGo for facts, news, and real-time info. NEVER call this tool for general chat, greetings, questions about your own identity (like 'who are you', 'how are you', 'what can you do', 'tell me about yourself'), or local tasks/device settings adjustments.",
             "parameters": {
                 "type": "object",
                 "properties": {"query": {"type": "string"}},
@@ -186,7 +192,7 @@ TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "set_volume",
-            "description": "Set system volume (0-100).",
+            "description": "Set system speaker volume level (0-100). Call this for any requests to change, increase, decrease, adjust, or set the volume.",
             "parameters": {
                 "type": "object",
                 "properties": {"level": {"type": "number"}},
@@ -206,7 +212,7 @@ TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "set_brightness",
-            "description": "Set screen brightness (0-100).",
+            "description": "Set system/monitor screen brightness level (0-100). Call this for any request to adjust, dim, increase, decrease, or set the PC screen brightness.",
             "parameters": {
                 "type": "object",
                 "properties": {"level": {"type": "number"}},
@@ -303,6 +309,36 @@ TOOLS_SCHEMA = [
         "function": {
             "name": "get_system_info",
             "description": "Get CPU, RAM, and Battery levels.",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "close_app",
+            "description": "Close a running PC application or process. Call this when the user asks to close, terminate, exit, or kill a specific program.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "app_name": {"type": "string", "description": "The name of the application to close (e.g. 'chrome', 'notepad')."}
+                },
+                "required": ["app_name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "empty_recycle_bin",
+            "description": "Empty the Windows Recycle Bin.",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_disk_space",
+            "description": "Get storage metrics, total/free disk space for C: and other local drives on the PC.",
             "parameters": {"type": "object", "properties": {}}
         }
     }

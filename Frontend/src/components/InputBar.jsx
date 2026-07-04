@@ -13,14 +13,13 @@ export default function InputBar({ onSend, onMicToggle, micActive }) {
 
     return (
         <div className="input-bar">
-
             <button
                 className={`mic-button ${micActive ? "active" : ""}`}
                 onClick={onMicToggle}
+                title={micActive ? "Stop Listening" : "Start Listening"}
             >
-                <RiMicFill size={24} />
+                <RiMicFill size={22} />
             </button>
-
 
             <input
                 value={text}
@@ -33,3 +32,5 @@ export default function InputBar({ onSend, onMicToggle, micActive }) {
         </div>
     );
 }
+
+

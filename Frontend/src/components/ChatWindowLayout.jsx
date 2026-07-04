@@ -3,14 +3,12 @@ import SofiOrb from "./SofiOrb";
 import Waveform from "./Waveform";
 import ChatBox from "./ChatBox";
 import InputBar from "./InputBar";
+import { RiExpandDiagonalLine, RiContractLeftLine, RiVolumeUpFill, RiVolumeMuteFill, RiRefreshLine } from "react-icons/ri";
 import "./ui.css";
 
-export default function ChatWindowLayout({ listening, waveformActive, messages, typing, onSend })
-{
-
+export default function ChatWindowLayout({ listening, waveformActive, messages, typing, onSend, voiceMuted, onToggleMute, onNewChat }) {
     const [micActive, setMicActive] = useState(false);
-
-
+    const [expanded, setExpanded] = useState(false);
 
     const handleMicToggle = () => {
         setMicActive(prev => {
@@ -34,16 +32,51 @@ export default function ChatWindowLayout({ listening, waveformActive, messages, 
         });
     };
 
+    const handleExpand = () => {
+        setExpanded(prev => !prev);
+    };
+
+    const handleRefreshClick = () => {
+        const confirmClear = window.confirm("Are you sure you want to clear the chat and start a new session?");
+        if (confirmClear) {
+            onNewChat();
+        }
+    };
 
     return (
-        <div className="chat-window">
+        <div className={`chat-window ${expanded ? "expanded" : ""}`}>
+            <div className="top-left-actions">
+                <button
+                    className="icon-button expand-btn"
+                    onClick={handleExpand}
+                    title={expanded ? "Collapse Window" : "Expand Window"}
+                >
+                    {expanded ? <RiContractLeftLine size={22} /> : <RiExpandDiagonalLine size={22} />}
+                </button>
+                <button
+                    className="icon-button refresh-btn"
+                    onClick={handleRefreshClick}
+                    title="New Chat"
+                >
+                    <RiRefreshLine size={22} />
+                </button>
+            </div>
 
-            <div className="visual-section">
-                <SofiOrb listening={listening} />
+            <div className={`visual-section ${expanded ? "expanded" : ""}`}>
+                <SofiOrb listening={listening} expanded={expanded} />
+
+                <button
+                    className={`mute-button ${voiceMuted ? "muted" : ""}`}
+                    onClick={onToggleMute}
+                    title={voiceMuted ? "Unmute Sofi Voice" : "Mute Sofi Voice"}
+                >
+                    {voiceMuted ? <RiVolumeMuteFill size={22} /> : <RiVolumeUpFill size={22} />}
+                </button>
+
                 <Waveform active={micActive || waveformActive} />
             </div>
 
-            <div className="interactions">
+            <div className={`interactions ${expanded ? "expanded" : ""}`}>
                 <ChatBox messages={messages} typing={typing} />
 
                 <InputBar

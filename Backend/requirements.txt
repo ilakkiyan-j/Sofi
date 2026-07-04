@@ -26,3 +26,7 @@ python-dotenv
 # Optional: CLI/Debug Tools
 rich
 colorama
+
+# System Control
+pycaw
+comtypes
