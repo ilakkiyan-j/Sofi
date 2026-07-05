@@ -1,2 +1,63 @@
-.idea
-node_modules
+# OS files
+.DS_Store
+Thumbs.db
+db.sqlite3
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.patch
+*.diff
+
+# Node / npm / yarn / pnpm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Python environment and cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.cache/
+.cache/
+/tmp
+
+# Application build & package outputs
+dist/
+build/
+backend/build/
+backend/dist/
+backend/backend.spec
+frontend/dist/
+frontend/dist-package/
+frontend/dist-ssr/
+
+# Logs, temporary files, and media
+*.log
+backend/chat_sessions.json
+backend/chat_history.json
+backend/sofi_reply.wav
+*.wav
+*.mp3
+*.ogg
+
+# Generated trees/documentation
+tree.txt
+backend/tree.txt
