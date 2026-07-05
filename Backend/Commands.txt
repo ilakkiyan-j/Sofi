@@ -2,4 +2,32 @@ Ollama:
     - Make sure your local LLM service is working: ollama serve
     - Then in another terminal: ollama run llama3 "Hello from Sofi!"
 
+.venv\Scripts\activate
 uvicorn server:app --reload
+
+=======================================================================
+PACKAGING / COMPILATION COMMANDS (.EXE)
+=======================================================================
+
+1. COMPILE THE PYTHON BACKEND (using PyInstaller):
+   - In terminal, cd to backend directory:
+     cd backend
+   - Install pyinstaller inside your virtual environment:
+     .venv\Scripts\pip install pyinstaller
+   - Compile python files using the configured spec file (which increases recursion limits):
+     .venv\Scripts\pyinstaller --noconfirm backend.spec
+
+2. BUILD THE REACT FRONTEND (using Vite):
+   - In terminal, cd to frontend directory:
+     cd ../frontend
+   - Install dependencies (including electron-builder):
+     npm install
+   - Build static assets:
+     npm run build
+
+3. BUNDLE THE ELECTRON APP INTO A STANDALONE INSTALLER (.EXE):
+   - Make sure backend was compiled in step 1 (outputs to backend/dist/backend/)
+   - In frontend directory, run:
+     npm run dist
+   - This packages everything and outputs the installer to:
+     frontend/dist-package/Sofi Setup 0.0.0.exe

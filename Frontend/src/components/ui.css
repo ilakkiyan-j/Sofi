@@ -336,8 +336,7 @@
 
 
 .msg {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 6px 12px;
     border-radius: 14px;
     font-size: 15px;
     margin-top: 10px;
@@ -354,6 +353,50 @@
     margin-right: auto;
     background: #e8edf5;
     color: #222;
+}
+
+/* Custom Markdown styling for chat bubbles */
+.msg p, .msg .chat-paragraph {
+    margin: 6px 4px;
+    line-height: 1.5;
+}
+
+.msg a.chat-link {
+    color: #0066cc;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.msg.user a.chat-link {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.msg ul.chat-list, .msg ol.chat-list {
+    margin: 6px 4px 6px 24px;
+    padding-left: 0;
+    line-height: 1.5;
+}
+
+.msg ul.chat-list li, .msg ol.chat-list li {
+    margin-bottom: 4px;
+}
+
+.msg code {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 90%;
+}
+
+.msg.user code {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.chat-para-block {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Typing dots */
@@ -586,4 +629,273 @@
     to {
         transform: rotate(360deg);
     }
-}
+}
+
+
+/* ------------------------------------------------------ */
+/* HISTORY SIDEBAR                                        */
+/* ------------------------------------------------------ */
+
+.history-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Hidden by default */
+    width: 280px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-right: 1px solid rgba(220, 225, 235, 0.6);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    z-index: 999; /* Float on top */
+    transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    padding: 20px;
+}
+
+.history-sidebar.open {
+    left: 0; /* Slide in */
+}
+
+/* Header */
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #334e68;
+    font-weight: 700;
+}
+
+.close-sidebar-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #627d98;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+}
+
+.close-sidebar-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #334e68;
+}
+
+/* New Chat Button */
+.sidebar-new-chat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #4da3ff, #7a5cf4);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: transform 0.2s, opacity 0.2s;
+    box-shadow: 0 4px 15px rgba(122, 92, 244, 0.25);
+}
+
+.sidebar-new-chat-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+/* Search Box */
+.sidebar-search-box {
+    display: flex;
+    align-items: center;
+    background: #f0f4f8;
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.sidebar-search-box .search-icon {
+    color: #829ab1;
+    margin-right: 8px;
+}
+
+.sidebar-search-box input {
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 14px;
+    color: #334e68;
+    width: 100%;
+}
+
+.clear-search-btn {
+    background: none;
+    border: none;
+    color: #829ab1;
+    cursor: pointer;
+    font-size: 18px;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0 4px;
+}
+
+/* Sessions List */
+.sidebar-list-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-right: 4px;
+}
+
+/* Custom Scrollbar for list container */
+.sidebar-list-container::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar-list-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+.sidebar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.group-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9fb3c8;
+    font-weight: 700;
+    margin-bottom: 4px;
+    padding-left: 8px;
+}
+
+.no-chats-placeholder {
+    font-size: 14px;
+    color: #829ab1;
+    text-align: center;
+    padding: 20px 0;
+    font-style: italic;
+}
+
+/* Session Item */
+.session-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.25s;
+    position: relative;
+    gap: 10px;
+}
+
+.session-item:hover {
+    background: rgba(77, 163, 255, 0.08);
+}
+
+.session-item.active {
+    background: rgba(77, 163, 255, 0.15);
+}
+
+.session-icon {
+    color: #829ab1;
+    flex-shrink: 0;
+}
+
+.session-item.active .session-icon {
+    color: #4da3ff;
+}
+
+.session-title {
+    font-size: 14px;
+    color: #486581;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    font-weight: 500;
+}
+
+.session-item.active .session-title {
+    color: #102a43;
+    font-weight: 600;
+}
+
+/* Session Item Actions */
+.session-item-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.2s ease;
+}
+
+.session-item:hover .session-item-actions {
+    opacity: 1; /* Show on hover */
+}
+
+/* When item is active, always keep actions visible or semi-visible */
+.session-item.active .session-item-actions {
+    opacity: 1;
+}
+
+.item-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #829ab1;
+    transition: background 0.2s, color 0.2s;
+}
+
+.item-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.pin-btn:hover {
+    color: #e5a50a;
+}
+
+.pinned-active {
+    color: #e5a50a;
+}
+
+.delete-btn:hover {
+    color: #ef4e4e;
+}
+
+/* Toggle Button Active Highlight */
+.history-btn.active {
+    background: rgba(122, 92, 244, 0.15);
+    color: #7a5cf4;
+}
+
+/* Shift main layout when sidebar is visible in expanded mode */
+@media (min-width: 901px) {
+    .chat-window.sidebar-visible {
+        padding-left: 300px; /* Leave space for sidebar */
+    }
+}
+

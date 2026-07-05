@@ -3,10 +3,34 @@ import SofiOrb from "./SofiOrb";
 import Waveform from "./Waveform";
 import ChatBox from "./ChatBox";
 import InputBar from "./InputBar";
-import { RiExpandDiagonalLine, RiContractLeftLine, RiVolumeUpFill, RiVolumeMuteFill, RiRefreshLine } from "react-icons/ri";
+import Sidebar from "./Sidebar";
+import {
+    RiExpandDiagonalLine,
+    RiContractLeftLine,
+    RiVolumeUpFill,
+    RiVolumeMuteFill,
+    RiRefreshLine,
+    RiHistoryLine
+} from "react-icons/ri";
 import "./ui.css";
 
-export default function ChatWindowLayout({ listening, waveformActive, messages, typing, onSend, voiceMuted, onToggleMute, onNewChat }) {
+export default function ChatWindowLayout({
+    listening,
+    waveformActive,
+    messages,
+    typing,
+    onSend,
+    voiceMuted,
+    onToggleMute,
+    onNewChat,
+    sessions,
+    currentSessionId,
+    sidebarOpen,
+    setSidebarOpen,
+    onSelectSession,
+    onTogglePin,
+    onDeleteSession
+}) {
     const [micActive, setMicActive] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
@@ -44,8 +68,30 @@ export default function ChatWindowLayout({ listening, waveformActive, messages, 
     };
 
     return (
-        <div className={`chat-window ${expanded ? "expanded" : ""}`}>
+        <div className={`chat-window ${expanded ? "expanded" : ""} ${sidebarOpen ? "sidebar-visible" : ""}`}>
+            <Sidebar
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                sessions={sessions}
+                currentSessionId={currentSessionId}
+                onSelectSession={(sid) => {
+                    onSelectSession(sid);
+                    // On small screens/normal size, auto-close sidebar on select
+                    if (!expanded) setSidebarOpen(false);
+                }}
+                onTogglePin={onTogglePin}
+                onDeleteSession={onDeleteSession}
+                onNewChat={onNewChat}
+            />
+
             <div className="top-left-actions">
+                <button
+                    className={`icon-button history-btn ${sidebarOpen ? "active" : ""}`}
+                    onClick={() => setSidebarOpen(prev => !prev)}
+                    title="Toggle Chat History"
+                >
+                    <RiHistoryLine size={22} />
+                </button>
                 <button
                     className="icon-button expand-btn"
                     onClick={handleExpand}
@@ -88,5 +134,4 @@ export default function ChatWindowLayout({ listening, waveformActive, messages, 
 
         </div>
     );
-
 }

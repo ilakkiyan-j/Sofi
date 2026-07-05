@@ -6,6 +6,7 @@ import ctypes
 from PIL import ImageGrab
 import win32clipboard
 import psutil
+import base64
 
 # For Pycaw Volume Control
 from ctypes import cast, POINTER
@@ -34,6 +35,41 @@ def run_powershell(cmd: str):
         return False, str(e)
 
 
+def _set_radio_state(kind: str, state: str) -> bool:
+    """kind should be 'WiFi' or 'Bluetooth', state should be 'On' or 'Off'"""
+    ps_script = f"""
+    Add-Type -AssemblyName System.Runtime.WindowsRuntime
+    $asTaskGeneric = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {{ $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' }})[0]
+    Function Await($WinRtTask, $ResultType) {{
+        $asTask = $asTaskGeneric.MakeGenericMethod($ResultType)
+        $netTask = $asTask.Invoke($null, @($WinRtTask))
+        $netTask.Wait(-1) | Out-Null
+        $netTask.Result
+    }}
+    [Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null
+    [Windows.Devices.Radios.RadioAccessStatus,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null
+    Await ([Windows.Devices.Radios.Radio]::RequestAccessAsync()) ([Windows.Devices.Radios.RadioAccessStatus]) | Out-Null
+    $radios = Await ([Windows.Devices.Radios.Radio]::GetRadiosAsync()) ([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]])
+    $target = $radios | Where-Object {{ $_.Kind -eq '{kind}' }}
+    if ($target) {{
+        Await ($target.SetStateAsync('{state}')) ([Windows.Devices.Radios.RadioAccessStatus]) | Out-Null
+        exit 0
+    }} else {{
+        exit 1
+    }}
+    """
+    encoded_script = base64.b64encode(ps_script.encode('utf-16le')).decode('ascii')
+    try:
+        res = subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded_script],
+            capture_output=True,
+            text=True
+        )
+        return res.returncode == 0
+    except Exception:
+        return False
+
+
 # ---------------------------------------------------------
 #  VOLUME CONTROL
 # ---------------------------------------------------------
@@ -48,7 +84,7 @@ def _get_audio_interface():
     devices = AudioUtilities.GetSpeakers()
     return devices.EndpointVolume
 
-def set_volume(level: int) -> str:
+def set_volume(level: int, *args, **kwargs) -> str:
     level = max(0, min(level, 100))
 
     try:
@@ -59,7 +95,7 @@ def set_volume(level: int) -> str:
         return f"Couldn't adjust volume: {e}"
 
 
-def mute_volume() -> str:
+def mute_volume(*args, **kwargs) -> str:
     try:
         volume = _get_audio_interface()
         volume.SetMute(1, None)
@@ -72,7 +108,7 @@ def mute_volume() -> str:
 #  BRIGHTNESS CONTROL
 # ---------------------------------------------------------
 
-def set_brightness(level: int) -> str:
+def set_brightness(level: int, *args, **kwargs) -> str:
     level = max(0, min(level, 100))
     success, _ = run_powershell(
         f"(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,{level})"
@@ -84,21 +120,13 @@ def set_brightness(level: int) -> str:
 #  WIFI CONTROL (Dynamic Adapter Detection)
 # ---------------------------------------------------------
 
-def wifi_off() -> str:
-    success, _ = run_powershell(
-        "[Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult() | "
-        "Where-Object {$_.Kind -eq 'WiFi'} | "
-        "ForEach-Object {$_.SetStateAsync(0).GetAwaiter().GetResult()}"
-    )
+def wifi_off(*args, **kwargs) -> str:
+    success = _set_radio_state("WiFi", "Off")
     return "WiFi is now turned OFF!" if success else "Couldn't turn off WiFi."
 
 
-def wifi_on() -> str:
-    success, _ = run_powershell(
-        "[Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult() | "
-        "Where-Object {$_.Kind -eq 'WiFi'} | "
-        "ForEach-Object {$_.SetStateAsync(1).GetAwaiter().GetResult()}"
-    )
+def wifi_on(*args, **kwargs) -> str:
+    success = _set_radio_state("WiFi", "On")
     return "WiFi is now turned ON!" if success else "Couldn't turn on WiFi."
 
 
@@ -106,23 +134,13 @@ def wifi_on() -> str:
 #  BLUETOOTH CONTROL (Official Windows API)
 # ---------------------------------------------------------
 
-def bluetooth_on() -> str:
-    success, _ = run_powershell(
-        "[Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult() | "
-        "Where-Object {$_.Kind -eq 'Bluetooth'} | "
-        "ForEach-Object {$_.SetStateAsync(1).GetAwaiter().GetResult()}"
-    )
-
+def bluetooth_on(*args, **kwargs) -> str:
+    success = _set_radio_state("Bluetooth", "On")
     return "Bluetooth is now ON!" if success else "Couldn't turn on Bluetooth."
 
 
-def bluetooth_off() -> str:
-    success, _ = run_powershell(
-        "[Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult() | "
-        "Where-Object {$_.Kind -eq 'Bluetooth'} | "
-        "ForEach-Object {$_.SetStateAsync(0).GetAwaiter().GetResult()}"
-    )
-
+def bluetooth_off(*args, **kwargs) -> str:
+    success = _set_radio_state("Bluetooth", "Off")
     return "Bluetooth is now OFF!" if success else "Couldn't turn off Bluetooth."
 
 
@@ -130,7 +148,7 @@ def bluetooth_off() -> str:
 #  SCREENSHOT
 # ---------------------------------------------------------
 
-def take_screenshot(path="C:/Users/ASUS/Downloads/screenshot.png") -> str:
+def take_screenshot(path="C:/Users/ASUS/Downloads/screenshot.png", *args, **kwargs) -> str:
     try:
         img = ImageGrab.grab()
         img.save(path)
@@ -143,7 +161,7 @@ def take_screenshot(path="C:/Users/ASUS/Downloads/screenshot.png") -> str:
 #  CLIPBOARD
 # ---------------------------------------------------------
 
-def get_clipboard() -> str:
+def get_clipboard(*args, **kwargs) -> str:
     try:
         win32clipboard.OpenClipboard()
         data = win32clipboard.GetClipboardData()
@@ -153,7 +171,7 @@ def get_clipboard() -> str:
         return "Clipboard is empty or unreadable."
 
 
-def set_clipboard(text: str) -> str:
+def set_clipboard(text: str, *args, **kwargs) -> str:
     try:
         win32clipboard.OpenClipboard()
         win32clipboard.EmptyClipboard()
@@ -168,17 +186,17 @@ def set_clipboard(text: str) -> str:
 #  SYSTEM ACTIONS
 # ---------------------------------------------------------
 
-def lock_system() -> str:
+def lock_system(*args, **kwargs) -> str:
     ctypes.windll.user32.LockWorkStation()
     return "Locking the system."
 
 
-def shutdown() -> str:
+def shutdown(*args, **kwargs) -> str:
     os.system("shutdown /s /t 0")
     return "Shutting down your PC."
 
 
-def restart() -> str:
+def restart(*args, **kwargs) -> str:
     os.system("shutdown /r /t 0")
     return "Restarting your PC."
 
@@ -187,7 +205,7 @@ def restart() -> str:
 #  SYSTEM INFO
 # ---------------------------------------------------------
 
-def get_system_info() -> dict:
+def get_system_info(*args, **kwargs) -> dict:
     return {
         "cpu_percent": psutil.cpu_percent(),
         "ram_percent": psutil.virtual_memory().percent,
@@ -199,7 +217,7 @@ def get_system_info() -> dict:
 #  ADDITIONAL PC INTEGRATIONS
 # ---------------------------------------------------------
 
-def close_app(app_name: str) -> str:
+def close_app(app_name: str, *args, **kwargs) -> str:
     """Fuzzy find and terminate running processes with the given name."""
     app_name_lower = app_name.lower().strip()
     terminated_count = 0
@@ -226,7 +244,7 @@ def close_app(app_name: str) -> str:
         return f"No running processes found matching '{app_name}'."
 
 
-def empty_recycle_bin() -> str:
+def empty_recycle_bin(*args, **kwargs) -> str:
     """Empty the Windows Recycle Bin."""
     try:
         # 7 = SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND
@@ -240,7 +258,7 @@ def empty_recycle_bin() -> str:
         return f"Could not empty recycle bin: {e}"
 
 
-def get_disk_space() -> str:
+def get_disk_space(*args, **kwargs) -> str:
     """Return total and free disk space for local drives."""
     drives_info = []
     for partition in psutil.disk_partitions():

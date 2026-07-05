@@ -28,7 +28,7 @@ def _full_path(filename: str) -> Path:
     return BASE_DIR / filename
 
 
-def list_files(folder: str = "") -> str:
+def list_files(folder: str = "", *args, **kwargs) -> str:
     folder_path = BASE_DIR if folder == "" else (BASE_DIR / folder)
     if not folder_path.exists():
         return f"Folder '{folder}' does not exist."
@@ -39,7 +39,7 @@ def list_files(folder: str = "") -> str:
     return "\n".join(items)
 
 
-def read_file(filename: str) -> str:
+def read_file(filename: str, *args, **kwargs) -> str:
     path = _full_path(filename)
     if not path.exists():
         return f"File '{filename}' not found."
@@ -50,7 +50,7 @@ def read_file(filename: str) -> str:
         return f"Error reading file: {e}"
 
 
-def create_file(filename: str) -> str:
+def create_file(filename: str, *args, **kwargs) -> str:
     path = _full_path(filename)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -60,7 +60,7 @@ def create_file(filename: str) -> str:
         return f"Error creating file: {e}"
 
 
-def write_file(filename: str, content: str) -> str:
+def write_file(filename: str, content: str, *args, **kwargs) -> str:
     path = _full_path(filename)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -70,7 +70,7 @@ def write_file(filename: str, content: str) -> str:
         return f"Error writing to file: {e}"
 
 
-def append_file(filename: str, content: str) -> str:
+def append_file(filename: str, content: str, *args, **kwargs) -> str:
     path = _full_path(filename)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -82,7 +82,7 @@ def append_file(filename: str, content: str) -> str:
         return f"Error appending to file: {e}"
 
 
-def delete_file(filename: str) -> str:
+def delete_file(filename: str, *args, **kwargs) -> str:
     path = _full_path(filename)
     if not path.exists():
         return f"File '{filename}' does not exist."
@@ -132,7 +132,7 @@ def resolve_path(user_text: str) -> Path:
     # if simply "open downloads"
     return base
 
-def open_path(path: str) -> str:
+def open_path(path: str, *args, **kwargs) -> str:
     resolved = resolve_path(path)
     log(resolved)
     if not resolved.exists():

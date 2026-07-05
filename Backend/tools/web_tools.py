@@ -337,7 +337,7 @@ def format_result_struct(mode, query, engine, results, summary):
     }
 
 
-def search_web(query: str):
+def search_web(query: str, *args, **kwargs):
     """
     Full blown search function:
     - detects mode, enhances query

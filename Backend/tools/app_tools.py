@@ -111,7 +111,7 @@ def launch_uwp_app(match):
 # ---------------------------------------------
 #   MAIN ENTRY
 # ---------------------------------------------
-def launch_app(app_name: str) -> str:
+def launch_app(app_name: str, *args, **kwargs) -> str:
     if not app_index:
         index_start_menu()
 

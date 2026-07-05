@@ -29,7 +29,7 @@ def should_enable_tools(user_text: str) -> bool:
     # 2. Check for general questions about Sofi or greetings using regex
     sofi_conversational_patterns = [
         r"\b(how are you|how's it going|how's life|how you doing)\b",
-        r"\b(who are you|what are you|what is your name|tell me about yourself|describe yourself)\b",
+        r"\b(who are you|what are you|what is your name|tell me about yourself|describe yourself|introduce yourself|introduce|say hello)\b",
         r"\b(who created you|who made you|who programmed you|who developed you)\b",
         r"\b(what can you do|what are your skills|what are your features|what tools do you have|things you can do|things can you do|what you can do|your capabilities|your purpose|what is your purpose)\b",
         r"\b(thank you|thanks|appreciate it)\b"
@@ -176,12 +176,19 @@ def clean_reply(text):
             pass
 
     # Strip leaked local LLM tool calling justifications/meta-text
-    text = re.sub(r"(?i)no tool call is required.*?\.\s*", "", text)
-    text = re.sub(r"(?i)this does not require a tool.*?\.\s*", "", text)
-    text = re.sub(r"(?i)general chat or greeting.*?\.\s*", "", text)
-    text = re.sub(r"(?i)i'll respond naturally:\s*", "", text)
-    text = re.sub(r"(?i)i will respond naturally:\s*", "", text)
-    text = re.sub(r"(?i)i must point out that.*?\.\s*", "", text)
+    text = re.sub(r"(?i)i'm not a tool[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i am not a tool[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i don't have a function call[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i do not have a function call[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)no function call[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i'll just respond naturally[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i will just respond naturally[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i'll respond naturally[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i will respond naturally[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)no tool call is required[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)this does not require a tool[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)general chat or greeting[^.:]*[.:]\s*", "", text)
+    text = re.sub(r"(?i)i must point out that[^.:]*[.:]\s*", "", text)
     
     # Strip any leaked function names or "(tool call: ...)" markers
     text = re.sub(r"(?i)\(?\s*tool\s*call\s*:\s*\w+\s*\)?", "", text)
