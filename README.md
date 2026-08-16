@@ -2,6 +2,8 @@
 
 Sofi is a highly customizable, personalized, offline-capable AI companion and desktop automation assistant designed and developed for **Ilakkiyan**. Combining a modern frontend interface, a native desktop shell, and a robust Python backend service, Sofi integrates local LLM capabilities, high-performance offline Speech-to-Text (STT), natural Text-to-Speech (TTS), long-term semantic memory, and desktop control automation.
 
+🎬 **Demo Video**: [Watch on LinkedIn](https://www.linkedin.com/posts/ilakkiyan-j_aiassistant-localai-ollama-ugcPost-7479490575767982080-camX/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEHRonUBc52UFbhgr9SKwmDdAV7xMsPCd2I)
+
 ---
 
 ## 🏗️ Architecture & Workflow
@@ -91,9 +93,37 @@ Ensure the following environments and applications are installed on your Windows
    - Download `vosk-model-en-us-0.22-lgraph` from [Vosk Models](https://alphacephei.com/vosk/models).
    - Extract it inside `backend/models/vosk-model-en-us-0.22-lgraph`.
 
+## 🚀 Quick Start Guide (Run the Whole Application)
+
+To start the complete **Sofi AI Operating System** (Ollama + Backend Server + React Frontend + Electron Desktop Shell), run the commands below in separate terminals:
+
+### Step 1: Start the Local Ollama LLM Daemon
+```powershell
+ollama serve
+```
+
+### Step 2: Start the FastAPI Async Backend Server
+```powershell
+cd backend
+.venv\Scripts\activate
+python -m uvicorn server:app --host 127.0.0.1 --port 8000
+```
+
+### Step 3: Start the React Frontend Dev Server
+```bash
+cd frontend
+npm run dev
+```
+
+### Step 4: Launch the Electron Desktop Application
+```bash
+cd electron
+npx electron main.js
+```
+
 ---
 
-## ⚙️ Setup and Installation
+## ⚙️ Setup and Detailed Installation
 
 ### 1. Set Up the Backend
 Navigate to the `backend` folder, set up a Python virtual environment, install the dependencies, and start the FastAPI service:

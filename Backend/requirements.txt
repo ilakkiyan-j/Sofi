@@ -2,6 +2,8 @@ torch
 # Core framework
 fastapi
 uvicorn
+httpx
+websockets
 
 # Speech recognition (offline)
 vosk

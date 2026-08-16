@@ -54,6 +54,7 @@ frontend/dist-ssr/
 backend/chat_sessions.json
 backend/chat_history.json
 backend/sofi_reply.wav
+backend/user_files/
 *.wav
 *.mp3
 *.ogg

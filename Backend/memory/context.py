@@ -1,11 +1,7 @@
-import chromadb
 import os
 import re
 
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
-
-client = chromadb.Client()
-collection = client.get_or_create_collection("sofi_memory")
 
 # In-session short-term memory
 conversation_state = {
@@ -46,31 +42,30 @@ def is_personal_fact(user_text: str) -> bool:
     return False
 
 
-def remember(user_text: str, reply: str):
-    """Store ONLY explicit personal facts as long-term memory."""
-    if not is_personal_fact(user_text):
-        return
+from services.memory.working import working_memory
+from services.memory.vector_rag import rag_engine
 
-    uid = str(abs(hash(user_text)))[-12:]
-    try:
-        collection.add(
-            documents=[f"User said: {user_text}\nSofi noted: {reply}"],
-            ids=[uid]
-        )
-        print("💾 Personal fact saved to memory.")
-    except Exception:
-        # Duplicate uid — already stored
-        pass
+def remember(user_text: str, reply: str):
+    """Store messages in L1 Working Memory and explicit facts in L3 Vector RAG."""
+    working_memory.add_message("user", user_text)
+    working_memory.add_message("sofi", reply)
+
+    if is_personal_fact(user_text):
+        rag_engine.add_memory(user_text, reply)
 
 
 def recall(query: str, top_k=3) -> str:
-    """Retrieve relevant long-term memory (personal facts only)."""
-    try:
-        results = collection.query(query_texts=[query], n_results=top_k)
-        docs = results.get("documents", [[]])[0]
-        return "\n".join(docs)
-    except Exception:
-        return ""
+    """Retrieve combined context from L1 Working Memory and L3 Vector RAG."""
+    working_context = working_memory.format_context_prompt()
+    rag_context = rag_engine.query_memories(query, top_k=top_k)
+
+    combined = []
+    if working_context:
+        combined.append(f"Recent Conversation:\n{working_context}")
+    if rag_context:
+        combined.append(f"Recalled Long-Term Facts:\n{rag_context}")
+
+    return "\n\n".join(combined)
 
 
 def clear_memory():

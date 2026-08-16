@@ -32,6 +32,21 @@ from tools.device_tools import (
     get_disk_space
 )
 
+from services.perception.ocr import ocr_engine
+from services.perception.code_sandbox import code_sandbox
+
+def read_screen_text():
+    """Extracts all visible text on user's screen using RapidOCR."""
+    return ocr_engine.read_screen_now()
+
+def run_python_code(code: str):
+    """Executes a Python code snippet in an isolated sandbox and returns stdout/stderr."""
+    res = code_sandbox.execute_python_code(code)
+    if res["status"] == "success":
+        return f"[Output]:\n{res['stdout']}"
+    else:
+        return f"[{res['status'].upper()}]:\n{res['stderr']}"
+
 TOOLS = {
     "list_files": list_files,
     "read_file": read_file,
@@ -42,6 +57,8 @@ TOOLS = {
     "search_web": search_web,
     "open_path": open_path,
     "launch_app": launch_app,
+    "read_screen_text": read_screen_text,
+    "run_python_code": run_python_code,
 
     # DEVICE AUTOMATION LAYER
     "set_volume": set_volume,
@@ -340,6 +357,28 @@ TOOLS_SCHEMA = [
             "name": "get_disk_space",
             "description": "Get storage metrics, total/free disk space for C: and other local drives on the PC.",
             "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_screen_text",
+            "description": "Read and extract all visible text currently displayed on the user's screen using high-speed OCR. Call this whenever the user asks 'what is on my screen', 'read my screen', 'summarize what's open', etc.",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_python_code",
+            "description": "Run a Python script in a sandboxed process and return the output. Call this when asked to write and run code, execute math/data scripts, or test Python snippets.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "code": {"type": "string", "description": "The Python code snippet to execute."}
+                },
+                "required": ["code"]
+            }
         }
     }
 ]
